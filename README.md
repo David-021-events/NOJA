@@ -1,5 +1,6 @@
 # NOJA
 A structural specification for accountable human judgment in AI-enabled systems
+[NOJA v0.6 Specification](./noja_v0_6.md)
 
 ### **What NOJA is**
 
