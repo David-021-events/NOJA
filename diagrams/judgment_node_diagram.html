@@ -10,13 +10,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #f4ede1;
-    --paper-2: #e8dfce;
-    --ink: #1c1814;
-    --ink-soft: #4a3f33;
+    --paper:     #f4ede1;
+    --paper-2:   #e8dfce;
+    --ink:       #1c1814;
+    --ink-soft:  #4a3f33;
     --ink-faint: #8a7d6c;
-    --accent: #a8421f;
-    --rule: #c9bca7;
+    --accent:    #a8421f;
+    --rule:      #c9bca7;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,7 +34,7 @@
     line-height: 1.5;
     background-image:
       radial-gradient(circle at 18% 22%, rgba(28,24,20,0.025) 1px, transparent 1.5px),
-      radial-gradient(circle at 72% 78%, rgba(28,24,20,0.02) 1px, transparent 1.5px),
+      radial-gradient(circle at 72% 78%, rgba(28,24,20,0.02)  1px, transparent 1.5px),
       radial-gradient(circle at 50% 50%, rgba(168,66,31,0.015) 1px, transparent 2px);
     background-size: 4px 4px, 7px 7px, 11px 11px;
   }
@@ -44,7 +44,7 @@
     width: 100%;
   }
 
-  /* ─── Header ─────────────────────────────────────── */
+  /* ─── Meta bar ───────────────────────────────────── */
 
   .meta {
     display: flex;
@@ -62,6 +62,8 @@
   }
 
   .meta-left { color: var(--accent); font-weight: 500; }
+
+  /* ─── Title ──────────────────────────────────────── */
 
   h1 {
     font-family: 'Fraunces', serif;
@@ -85,11 +87,28 @@
     font-weight: 400;
     font-size: 1.3rem;
     color: var(--ink-soft);
-    margin-bottom: 3rem;
-    max-width: 36rem;
+    margin-bottom: 0.5rem;
+    max-width: 42rem;
   }
 
-  /* ─── Node Frame (Accountability) ────────────────── */
+  /* Naming note — sits directly under subtitle, visually quieter */
+  .naming-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 3rem;
+    padding-left: 0.1rem;
+  }
+
+  .naming-note em {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* ─── Node Frame (Accountability wrapper) ────────── */
 
   .node-frame {
     position: relative;
@@ -99,6 +118,7 @@
     box-shadow: 10px 10px 0 var(--paper-2);
   }
 
+  /* The frame label sits on the border — it IS the node label */
   .frame-label {
     position: absolute;
     top: -0.7rem;
@@ -172,7 +192,7 @@
     background: rgba(168, 66, 31, 0.04);
   }
 
-  /* ─── Flow ───────────────────────────────────────── */
+  /* ─── Flow: Prediction → Judgment → Execution ───── */
 
   .flow {
     display: grid;
@@ -236,8 +256,7 @@
     margin: 0 auto;
   }
 
-  /* Arrows */
-
+  /* Arrows between steps */
   .arrow {
     display: flex;
     align-items: center;
@@ -246,6 +265,7 @@
     padding: 0 0.8rem;
   }
 
+  /* Input / Output connectors */
   .arrow-io {
     flex-direction: column;
     gap: 0.45rem;
@@ -283,7 +303,16 @@
     padding-top: 2rem;
   }
 
-  .caption h3 {
+  /* Third panel spans full width */
+  .caption-wide {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--rule);
+    padding-top: 2rem;
+    margin-top: 0.25rem;
+  }
+
+  .caption h3,
+  .caption-wide h3 {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.7rem;
     letter-spacing: 0.22em;
@@ -293,7 +322,8 @@
     margin-bottom: 0.7rem;
   }
 
-  .caption p {
+  .caption p,
+  .caption-wide p {
     font-family: 'Fraunces', serif;
     font-weight: 400;
     font-size: 1.02rem;
@@ -301,7 +331,8 @@
     color: var(--ink);
   }
 
-  .caption em {
+  .caption em,
+  .caption-wide em {
     font-style: italic;
     color: var(--accent);
   }
@@ -317,6 +348,7 @@
     .arrow svg { transform: rotate(90deg); }
     .arrow-io { gap: 0.3rem; }
     .caption { grid-template-columns: 1fr; gap: 1.75rem; }
+    .caption-wide { margin-top: 0; }
     .frame-header {
       position: static;
       margin-bottom: 1.5rem;
@@ -329,111 +361,134 @@
 </style>
 </head>
 <body>
-  <main class="slide">
+<main class="slide">
 
-    <div class="meta">
-      <span class="meta-left">NOJA · v0.6 · §2</span>
-      <span>Nodes of Judgement Architecture</span>
-      <span>Specification</span>
-    </div>
+  <div class="meta">
+    <span class="meta-left">NOJA · v0.6 · §2</span>
+    <span>Nodes of Judgement Architecture</span>
+    <span>Specification</span>
+  </div>
 
-    <h1>The <em>Judgment</em> Node</h1>
-    <p class="subtitle">The unit of structure. Four functions, one accountable role.</p>
+  <h1>The <em>Judgment</em> Node</h1>
 
-    <!-- ─── Node ─────────────────────────────────── -->
+  <p class="subtitle">The unit of structure. Four functions, one accountable role.</p>
 
-    <div class="node-frame">
+  <!-- Naming clarification — sits quietly under the subtitle -->
+  <p class="naming-note">
+    Named for what it insists must always be present —
+    <em>a human act of judgment, signed and revisable</em>
+    — not for the function of the same name inside it.
+  </p>
 
-      <div class="frame-label">Judgment Node</div>
+  <!-- ─── Node ─────────────────────────────────────── -->
 
-      <div class="frame-header">
-        <div class="role-block">
-          <span class="role-tag">Accountable Role</span>
-          <span class="role-name">e.g. Head of Credit Risk</span>
-        </div>
-        <div class="signature-block">
-          <span>Signed Artifact</span>
-          <span class="sig-mark">§</span>
-        </div>
+  <div class="node-frame">
+
+    <div class="frame-label">Judgment Node</div>
+
+    <!-- Accountability: the frame header identifies the owner and their signature -->
+    <div class="frame-header">
+      <div class="role-block">
+        <span class="role-tag">Accountable Role</span>
+        <span class="role-name">e.g. Head of Credit Risk</span>
       </div>
-
-      <div class="flow">
-
-        <!-- Input -->
-        <div class="arrow arrow-io">
-          <span class="io-label">Input</span>
-          <svg width="44" height="20" viewBox="0 0 44 20" fill="none">
-            <path d="M0 10 L38 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
-            <path d="M30 4 L38 10 L30 16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="miter" stroke-linecap="square"/>
-          </svg>
-          <span class="io-sub">data, signals, observations</span>
-        </div>
-
-        <!-- 1. Prediction -->
-        <div class="step">
-          <span class="step-num">1</span>
-          <div class="step-label">Function</div>
-          <div class="step-name">Prediction</div>
-          <div class="step-desc">What is, or might be, the case. <em>Does not prescribe action.</em></div>
-        </div>
-
-        <div class="arrow">
-          <svg width="44" height="20" viewBox="0 0 44 20" fill="none">
-            <path d="M0 10 L38 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
-            <path d="M30 4 L38 10 L30 16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="miter" stroke-linecap="square"/>
-          </svg>
-        </div>
-
-        <!-- 2. Judgment -->
-        <div class="step">
-          <span class="step-num">2</span>
-          <div class="step-label">Function</div>
-          <div class="step-name">Judgment</div>
-          <div class="step-desc">Policy, values, and risk tolerance applied to the prediction.</div>
-        </div>
-
-        <div class="arrow">
-          <svg width="44" height="20" viewBox="0 0 44 20" fill="none">
-            <path d="M0 10 L38 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
-            <path d="M30 4 L38 10 L30 16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="miter" stroke-linecap="square"/>
-          </svg>
-        </div>
-
-        <!-- 3. Execution -->
-        <div class="step">
-          <span class="step-num">3</span>
-          <div class="step-label">Function</div>
-          <div class="step-name">Execution</div>
-          <div class="step-desc">The decision is carried out — by rule, algorithm, agent, or human.</div>
-        </div>
-
-        <!-- Output -->
-        <div class="arrow arrow-io">
-          <span class="io-label">Output</span>
-          <svg width="44" height="20" viewBox="0 0 44 20" fill="none">
-            <path d="M0 10 L38 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
-            <path d="M30 4 L38 10 L30 16" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="miter" stroke-linecap="square"/>
-          </svg>
-          <span class="io-sub">action taken, or input to next node</span>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- ─── Caption ──────────────────────────────── -->
-
-    <div class="caption">
-      <div>
-        <h3>The Frame — Accountability</h3>
-        <p>The fourth function isn't a step in the flow. It's the <em>boundary</em> of the node. Exactly one named role owns everything inside, and signs the policy that governs it.</p>
-      </div>
-      <div>
-        <h3>The Flow — Prediction → Judgment → Execution</h3>
-        <p>Prediction describes. Judgment decides. Execution acts. The output of one node becomes the <em>input</em> to the next, forming a traceable network.</p>
+      <div class="signature-block">
+        <span>Signed Artifact</span>
+        <span class="sig-mark">§</span>
       </div>
     </div>
 
-  </main>
+    <!-- P → J → E flow inside the accountability frame -->
+    <div class="flow">
+
+      <!-- Input connector -->
+      <div class="arrow arrow-io">
+        <span class="io-label">Input</span>
+        <svg width="44" height="20" viewBox="0 0 44 20" fill="none">
+          <path d="M0 10 L38 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+          <path d="M30 4 L38 10 L30 16" stroke="currentColor" stroke-width="1.5" fill="none"
+                stroke-linejoin="miter" stroke-linecap="square"/>
+        </svg>
+        <span class="io-sub">data, signals, observations</span>
+      </div>
+
+      <!-- 1. Prediction -->
+      <div class="step">
+        <span class="step-num">1</span>
+        <div class="step-label">Function</div>
+        <div class="step-name">Prediction</div>
+        <div class="step-desc">What is, or might be, the case. <em>Does not prescribe action.</em></div>
+      </div>
+
+      <div class="arrow">
+        <svg width="44" height="20" viewBox="0 0 44 20" fill="none">
+          <path d="M0 10 L38 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+          <path d="M30 4 L38 10 L30 16" stroke="currentColor" stroke-width="1.5" fill="none"
+                stroke-linejoin="miter" stroke-linecap="square"/>
+        </svg>
+      </div>
+
+      <!-- 2. Judgment -->
+      <div class="step">
+        <span class="step-num">2</span>
+        <div class="step-label">Function</div>
+        <div class="step-name">Judgment</div>
+        <div class="step-desc">Policy, values, and risk tolerance applied to the prediction.</div>
+      </div>
+
+      <div class="arrow">
+        <svg width="44" height="20" viewBox="0 0 44 20" fill="none">
+          <path d="M0 10 L38 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+          <path d="M30 4 L38 10 L30 16" stroke="currentColor" stroke-width="1.5" fill="none"
+                stroke-linejoin="miter" stroke-linecap="square"/>
+        </svg>
+      </div>
+
+      <!-- 3. Execution -->
+      <div class="step">
+        <span class="step-num">3</span>
+        <div class="step-label">Function</div>
+        <div class="step-name">Execution</div>
+        <div class="step-desc">The decision is carried out — by rule, algorithm, agent, or human.</div>
+      </div>
+
+      <!-- Output connector -->
+      <div class="arrow arrow-io">
+        <span class="io-label">Output</span>
+        <svg width="44" height="20" viewBox="0 0 44 20" fill="none">
+          <path d="M0 10 L38 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+          <path d="M30 4 L38 10 L30 16" stroke="currentColor" stroke-width="1.5" fill="none"
+                stroke-linejoin="miter" stroke-linecap="square"/>
+        </svg>
+        <span class="io-sub">action taken, or input to next node</span>
+      </div>
+
+    </div>
+
+  </div><!-- end .node-frame -->
+
+  <!-- ─── Captions ─────────────────────────────────── -->
+
+  <div class="caption">
+
+    <div>
+      <h3>The Frame — Accountability</h3>
+      <p>The fourth function is not a step in the flow. It is the <em>boundary</em> of the node. Exactly one named role owns everything inside and signs the artifact that governs it. The frame is what makes the node accountable, not just operational.</p>
+    </div>
+
+    <div>
+      <h3>The Flow — Prediction → Judgment → Execution</h3>
+      <p>Prediction describes. Judgment decides. Execution acts. The output of one node becomes the <em>input</em> to the next, forming a network in which every edge is traceable back to a signed artifact and a named role.</p>
+    </div>
+
+    <!-- Full-width third panel: resolves the naming collision -->
+    <div class="caption-wide">
+      <h3>Why "Judgment Node" — and not the function of the same name?</h3>
+      <p>The word <em>judgment</em> appears twice here: once as a function label inside the flow, and once as the name of the node itself. They are not the same thing. The function called Judgment is step 2 — the application of policy to a prediction. The node is called a judgment node because the architecture insists that <em>a human act of judgment must be present and signed in every unit of consequential decision-making.</em> That is what NOJA exists to prevent from disappearing. The frame is its evidence.</p>
+    </div>
+
+  </div>
+
+</main>
 </body>
 </html>
