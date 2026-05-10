@@ -1,0 +1,468 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Escalation Handoff — NOJA v0.6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:       #f4ede1;
+    --paper-2:     #e8dfce;
+    --ink:         #1c1814;
+    --ink-soft:    #4a3f33;
+    --ink-faint:   #8a7d6c;
+    --accent:      #a8421f;
+    --green:       #2a6040;
+    --rule:        #c9bca7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 3.5rem 2rem 4rem;
+    background-image:
+      radial-gradient(circle at 18% 22%, rgba(28,24,20,0.025) 1px, transparent 1.5px),
+      radial-gradient(circle at 72% 78%, rgba(28,24,20,0.02) 1px, transparent 1.5px);
+    background-size: 4px 4px, 7px 7px;
+  }
+
+  .slide { max-width: 1100px; width: 100%; }
+
+  /* ── Meta bar ─────────────────────────────── */
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 0.6rem 0;
+    margin-bottom: 2.25rem;
+  }
+
+  .meta-accent { color: var(--accent); font-weight: 500; }
+
+  /* ── Heading ──────────────────────────────── */
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    font-variation-settings: "SOFT" 100;
+    margin-bottom: 0.55rem;
+  }
+
+  h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
+
+  .subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    margin-bottom: 2.75rem;
+  }
+
+  /* ── Input chip ───────────────────────────── */
+
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .input-chip {
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    padding: 0.35rem 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .vline { width: 1.5px; background: var(--ink); }
+  .vline-sm { height: 1.6rem; }
+  .vline-md { height: 2rem; }
+  .vline-accent { background: var(--accent); }
+  .vline-green  { background: var(--green); }
+
+  /* ── Node ─────────────────────────────────── */
+
+  .node {
+    border: 1.5px solid var(--ink);
+    background: rgba(255, 252, 245, 0.6);
+    position: relative;
+    padding: 1.6rem 1.75rem;
+    width: 100%;
+  }
+
+  .node-dt   { box-shadow: 9px 9px 0 var(--paper-2); }
+  .node-hitl { border-color: var(--accent); background: rgba(168,66,31,0.06); }
+
+  .mode-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 0.2rem 0.75rem;
+    display: inline-block;
+    margin-bottom: 0.9rem;
+  }
+
+  .badge-dt   { background: var(--ink);    color: var(--paper); }
+  .badge-hitl { background: var(--accent); color: var(--paper); }
+
+  .role-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.18rem;
+  }
+
+  .role-name {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .node-body {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 0.9rem;
+  }
+
+  .props {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .prop {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    padding: 0.18rem 0.55rem;
+  }
+
+  /* sig stamp on design-time node */
+  .sig-stamp {
+    position: absolute;
+    top: 1.35rem;
+    right: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    width: 58px;
+    height: 58px;
+    border: 1.25px solid var(--accent);
+    border-radius: 50%;
+    background: rgba(168,66,31,0.05);
+    justify-content: center;
+    transform: rotate(-7deg);
+  }
+
+  .sig-mark {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .sig-word {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.45rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ── Fork SVG ─────────────────────────────── */
+
+  .fork-svg-wrap {
+    width: 100%;
+    line-height: 0;
+  }
+
+  .fork-svg-wrap svg { width: 100%; display: block; }
+
+  /* ── Branches ─────────────────────────────── */
+
+  .branches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .branch-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .path-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 0.22rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    white-space: nowrap;
+  }
+
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-green  { background: var(--green); }
+  .dot-accent { background: var(--accent); }
+
+  .label-green  { color: var(--green); }
+  .label-accent { color: var(--accent); }
+
+  /* ── Output chips ─────────────────────────── */
+
+  .output-chip {
+    width: 100%;
+    border: 1px solid;
+    padding: 0.85rem 1.1rem;
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .output-chip.green-chip  { border-color: var(--green); }
+  .output-chip.accent-chip { border-color: var(--accent); }
+
+  .chip-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .chip-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.12rem;
+  }
+
+  .chip-desc {
+    font-family: 'Fraunces', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+
+  /* ── Caption ──────────────────────────────── */
+
+  .caption {
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 2rem;
+  }
+
+  .caption h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.7rem;
+  }
+
+  .h3-dt   { color: var(--ink); }
+  .h3-hitl { color: var(--accent); }
+
+  .caption p {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  .caption em { font-style: italic; color: var(--accent); }
+
+  /* ── Responsive ───────────────────────────── */
+
+  @media (max-width: 780px) {
+    .branches { grid-template-columns: 1fr; gap: 1rem; }
+    .caption  { grid-template-columns: 1fr; gap: 1.5rem; }
+    .sig-stamp { display: none; }
+    .path-label { white-space: normal; }
+  }
+</style>
+</head>
+<body>
+<main class="slide">
+
+  <!-- Meta bar -->
+  <div class="meta">
+    <span class="meta-accent">NOJA · v0.6 · §3.4</span>
+    <span>Judgment Network · Escalation Pattern</span>
+    <span>Two-Node Composition</span>
+  </div>
+
+  <!-- Heading -->
+  <h1>The <em>Escalation</em> Handoff</h1>
+  <p class="subtitle">Two judgment modes, one accountable network.</p>
+
+  <!-- Input -->
+  <div class="input-row">
+    <div class="input-chip">
+      <svg width="7" height="7" viewBox="0 0 7 7"><circle cx="3.5" cy="3.5" r="3" stroke="currentColor" fill="none" stroke-width="1"/></svg>
+      Input · decision to be made
+    </div>
+    <div class="vline vline-sm"></div>
+  </div>
+
+  <!-- Design-Time Node -->
+  <div class="node node-dt">
+    <div class="sig-stamp" aria-hidden="true">
+      <span class="sig-mark">§</span>
+      <span class="sig-word">Signed</span>
+    </div>
+
+    <span class="mode-badge badge-dt">Mode 1 — Design-Time Judgment</span>
+
+    <div class="role-label">Accountable Role</div>
+    <div class="role-name">e.g. Head of Credit Risk</div>
+
+    <p class="node-body">
+      Policy is signed in advance and governs all instances automatically. The accountable role signs once; the system applies it at scale. Escalation thresholds are defined inside the signed artifact — routing to HITL is itself an act of encoded judgment.
+    </p>
+
+    <div class="props">
+      <span class="prop">Signed in advance</span>
+      <span class="prop">Runs automatically</span>
+      <span class="prop">Governs many instances</span>
+      <span class="prop">Threshold defined in policy</span>
+    </div>
+  </div>
+
+  <!-- Fork -->
+  <div class="fork-svg-wrap" aria-hidden="true">
+    <svg viewBox="0 0 1100 56" preserveAspectRatio="none" fill="none">
+      <!-- stem down from DT node -->
+      <line x1="550" y1="0"  x2="550" y2="24" stroke="#1c1814" stroke-width="1.5"/>
+      <!-- horizontal bar -->
+      <line x1="275" y1="24" x2="825" y2="24" stroke="#1c1814" stroke-width="1.5"/>
+      <!-- drop to left (routine / green) -->
+      <line x1="275" y1="24" x2="275" y2="56" stroke="#2a6040"  stroke-width="1.5"/>
+      <!-- drop to right (escalation / rust) -->
+      <line x1="825" y1="24" x2="825" y2="56" stroke="#a8421f"  stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <!-- Branches -->
+  <div class="branches">
+
+    <!-- Left: Routine path -->
+    <div class="branch-col">
+      <div class="path-label label-green">
+        <span class="dot dot-green"></span>
+        Routine cases · below threshold
+      </div>
+      <div class="vline vline-sm vline-green"></div>
+      <div class="output-chip green-chip">
+        <span class="chip-dot" style="background:var(--green);"></span>
+        <div>
+          <div class="chip-label">Output</div>
+          <div class="chip-desc">Auto-executed decision</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Escalation path -->
+    <div class="branch-col">
+      <div class="path-label label-accent">
+        <span class="dot dot-accent"></span>
+        Threshold breached · escalate
+      </div>
+      <div class="vline vline-sm vline-accent"></div>
+
+      <!-- HITL Node -->
+      <div class="node node-hitl">
+        <span class="mode-badge badge-hitl">Mode 2 — Human-in-the-Loop</span>
+
+        <div class="role-label">Accountable Role</div>
+        <div class="role-name">e.g. Senior Underwriter</div>
+
+        <p class="node-body">
+          Live instance routed to a named human. That human decides. Their signature attaches to this instance only — not to the policy that escalated it.
+        </p>
+
+        <div class="props">
+          <span class="prop">Live routing</span>
+          <span class="prop">Named human decides</span>
+          <span class="prop">Signature per instance</span>
+        </div>
+      </div>
+
+      <div class="vline vline-sm vline-accent"></div>
+      <div class="output-chip accent-chip" style="width:100%;">
+        <span class="chip-dot" style="background:var(--accent);"></span>
+        <div>
+          <div class="chip-label">Output</div>
+          <div class="chip-desc">Human decision · signed to this case</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Caption -->
+  <div class="caption">
+    <div>
+      <h3 class="h3-dt">Design-Time is not the lesser mode</h3>
+      <p>A policy signed in a quiet room before any live data touches it is often the more reliable safeguard. HITL is not automatically safer simply because <em>a human is present</em> at the moment of decision.</p>
+    </div>
+    <div>
+      <h3 class="h3-hitl">HITL is not a fallback for failure</h3>
+      <p>It is a legitimate judgment mode for cases the design-time policy <em>explicitly routes</em> to a named human. The escalation threshold is itself an act of signed judgment — part of the design-time artifact, not an afterthought.</p>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>
