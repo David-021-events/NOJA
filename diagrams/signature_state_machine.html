@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signature State Machine — NOJA v0.6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:     #f4ede1;
+    --paper-2:   #e8dfce;
+    --ink:       #1c1814;
+    --ink-soft:  #4a3f33;
+    --ink-faint: #8a7d6c;
+    --accent:    #a8421f;
+    --rule:      #c9bca7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 3.5rem 2rem 4rem;
+    background-image:
+      radial-gradient(circle at 18% 22%, rgba(28,24,20,0.025) 1px, transparent 1.5px),
+      radial-gradient(circle at 72% 78%, rgba(28,24,20,0.02)  1px, transparent 1.5px);
+    background-size: 4px 4px, 7px 7px;
+  }
+
+  .slide { max-width: 1100px; width: 100%; }
+
+  /* ── Meta bar ─────────────────────────────── */
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 0.6rem 0;
+    margin-bottom: 2.25rem;
+  }
+
+  .meta-accent { color: var(--accent); font-weight: 500; }
+
+  /* ── Heading ──────────────────────────────── */
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    font-variation-settings: "SOFT" 100;
+    margin-bottom: 0.55rem;
+  }
+
+  h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
+
+  .subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── Diagram ──────────────────────────────── */
+
+  .diagram-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .diagram-wrap svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* ── Legend ───────────────────────────────── */
+
+  .legend {
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .ll {
+    width: 34px;
+    height: 2px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .ll::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -3px;
+    border-left: 6px solid currentColor;
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+  }
+
+  .ll-ink   { background: var(--ink);       color: var(--ink); }
+  .ll-accent { background: var(--accent);   color: var(--accent); }
+  .ll-faint {
+    background: repeating-linear-gradient(
+      to right, var(--ink-faint) 0, var(--ink-faint) 4px,
+      transparent 4px, transparent 7px);
+    color: var(--ink-faint);
+  }
+
+  /* ── Caption ──────────────────────────────── */
+
+  .caption {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 2rem;
+  }
+
+  .caption h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.7rem;
+  }
+
+  .h3-ink    { color: var(--ink); }
+  .h3-accent { color: var(--accent); }
+
+  .caption p {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  .caption em { font-style: italic; color: var(--accent); }
+
+  @media (max-width: 700px) {
+    .caption { grid-template-columns: 1fr; gap: 1.5rem; }
+    .legend  { gap: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<main class="slide">
+
+  <!-- Meta bar -->
+  <div class="meta">
+    <span class="meta-accent">NOJA · v0.6 · §4.1</span>
+    <span>Signature Lifecycle</span>
+    <span>State Machine</span>
+  </div>
+
+  <!-- Heading -->
+  <h1>The <em>Signature</em> State Machine</h1>
+  <p class="subtitle">Every signature exists in exactly one state. Transitions are signed events.</p>
+
+  <!-- Diagram -->
+  <div class="diagram-wrap">
+  <svg viewBox="0 0 1060 730" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Ink arrowhead -->
+      <marker id="arr" markerWidth="7" markerHeight="5" refX="6.5" refY="2.5" orient="auto">
+        <path d="M0,0 L7,2.5 L0,5 Z" fill="#1c1814"/>
+      </marker>
+      <!-- Accent (rust) arrowhead -->
+      <marker id="arr-a" markerWidth="7" markerHeight="5" refX="6.5" refY="2.5" orient="auto">
+        <path d="M0,0 L7,2.5 L0,5 Z" fill="#a8421f"/>
+      </marker>
+      <!-- Faint arrowhead for skip path -->
+      <marker id="arr-f" markerWidth="7" markerHeight="5" refX="6.5" refY="2.5" orient="auto">
+        <path d="M0,0 L7,2.5 L0,5 Z" fill="#8a7d6c"/>
+      </marker>
+    </defs>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  ZONE BACKGROUNDS                           -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- Recoverable zone (SUSPENDED + LAPSED) -->
+    <rect x="784" y="107" width="244" height="288" fill="rgba(168,66,31,0.045)" stroke="none"/>
+    <text x="906" y="100" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#a8421f" letter-spacing="0.22em">RECOVERABLE</text>
+
+    <!-- Terminal zone -->
+    <rect x="76" y="463" width="876" height="248" fill="rgba(28,24,20,0.028)" stroke="none"/>
+    <text x="514" y="455" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#8a7d6c" letter-spacing="0.22em">TERMINAL PATHS</text>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  STATE NODES                                -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- 1. DRAFTED  (cx=150, cy=72) -->
+    <rect x="55" y="39" width="190" height="66"
+          fill="#f4ede1" stroke="#1c1814" stroke-width="1.25"/>
+    <text x="150" y="65" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="15" font-weight="600" fill="#1c1814">Drafted</text>
+    <text x="150" y="81" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8.5"
+          fill="#8a7d6c" letter-spacing="0.1em">EXECUTION · NO</text>
+    <text x="150" y="97" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="9" font-style="italic" fill="#4a3f33">Artifact exists; no signature</text>
+
+    <!-- 2. PROVISIONAL  (cx=150, cy=215) -->
+    <rect x="55" y="182" width="190" height="66"
+          fill="#f4ede1" stroke="#1c1814" stroke-width="1.25"/>
+    <text x="150" y="208" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="15" font-weight="600" fill="#1c1814">Provisional</text>
+    <text x="150" y="224" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8.5"
+          fill="#8a7d6c" letter-spacing="0.08em">EXECUTION · LOGGED ONLY</text>
+    <text x="150" y="240" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="9" font-style="italic" fill="#4a3f33">Shadow / observation only</text>
+
+    <!-- 3. ACTIVE  (cx=495, cy=278) — hub state, prominent -->
+    <rect x="370" y="232" width="250" height="92"
+          fill="#f8f0e4" stroke="#1c1814" stroke-width="2.25"/>
+    <!-- dark header bar -->
+    <rect x="370" y="232" width="250" height="21" fill="#1c1814"/>
+    <text x="495" y="247" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="7.8"
+          fill="#f4ede1" letter-spacing="0.24em">EXECUTION · PERMITTED</text>
+    <text x="495" y="272" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="21" font-weight="600" fill="#1c1814">Active</text>
+    <text x="495" y="292" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="9.5" font-style="italic" fill="#4a3f33">Signed for live execution</text>
+    <text x="495" y="310" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="7.5"
+          fill="#8a7d6c" letter-spacing="0.06em">The only state permitting live action</text>
+
+    <!-- 4. SUSPENDED  (cx=906, cy=155) -->
+    <rect x="801" y="122" width="210" height="66"
+          fill="#fdf5e8" stroke="#1c1814" stroke-width="1.25"/>
+    <text x="906" y="148" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="14" font-weight="600" fill="#1c1814">Suspended</text>
+    <text x="906" y="164" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8.5"
+          fill="#8a7d6c" letter-spacing="0.08em">EXECUTION · NO</text>
+    <text x="906" y="179" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="9" font-style="italic" fill="#4a3f33">Fallback · intent to resume</text>
+
+    <!-- 5. LAPSED  (cx=906, cy=342) -->
+    <rect x="801" y="309" width="210" height="66"
+          fill="#fdf5e8" stroke="#1c1814" stroke-width="1.25"/>
+    <text x="906" y="335" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="14" font-weight="600" fill="#1c1814">Lapsed</text>
+    <text x="906" y="351" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8.5"
+          fill="#8a7d6c" letter-spacing="0.08em">EXECUTION · NO</text>
+    <text x="906" y="366" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="9" font-style="italic" fill="#4a3f33">Fallback · scope conditions breached</text>
+
+    <!-- 6. REVOKED  (cx=192, cy=512) -->
+    <rect x="90" y="479" width="205" height="66"
+          fill="#f4ede1" stroke="#1c1814" stroke-width="1.25"/>
+    <text x="192" y="505" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="14" font-weight="600" fill="#1c1814">Revoked</text>
+    <text x="192" y="521" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8.5"
+          fill="#8a7d6c" letter-spacing="0.08em">EXECUTION · NO</text>
+    <text x="192" y="536" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="9" font-style="italic" fill="#4a3f33">Fallback applies · for cause</text>
+
+    <!-- 7. SUPERSEDED  (cx=822, cy=512) -->
+    <rect x="715" y="479" width="215" height="66"
+          fill="#f4ede1" stroke="#1c1814" stroke-width="1.25"/>
+    <text x="822" y="505" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="14" font-weight="600" fill="#1c1814">Superseded</text>
+    <text x="822" y="521" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8.5"
+          fill="#8a7d6c" letter-spacing="0.08em">SUCCESSOR'S TERMS APPLY</text>
+    <text x="822" y="536" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="9" font-style="italic" fill="#4a3f33">Orderly replacement</text>
+
+    <!-- 8. ARCHIVED  (cx=506, cy=651) — terminal, muted -->
+    <rect x="401" y="618" width="210" height="66"
+          fill="#e8dfce" stroke="#8a7d6c" stroke-width="1.25" stroke-dasharray="5,3"/>
+    <text x="506" y="644" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="14" font-weight="600" fill="#4a3f33">Archived</text>
+    <text x="506" y="660" text-anchor="middle"
+          font-family="IBM Plex Mono, monospace" font-size="8.5"
+          fill="#8a7d6c" letter-spacing="0.08em">EXECUTION · NO · TERMINAL</text>
+    <text x="506" y="675" text-anchor="middle"
+          font-family="Fraunces, serif" font-size="9" font-style="italic" fill="#8a7d6c">Retained for audit only</text>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  ARROWS                                     -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- ── Onboarding path ─────────────────────── -->
+
+    <!-- DRAFTED → PROVISIONAL  (straight down) -->
+    <line x1="150" y1="105" x2="150" y2="180"
+          stroke="#1c1814" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- PROVISIONAL → ACTIVE  (curve right-down) -->
+    <path d="M 245,215 C 335,215 370,262 370,265"
+          stroke="#1c1814" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+    <!-- DRAFTED → ACTIVE  (skip Provisional — L-shaped, dashed) -->
+    <path d="M 245,72 L 495,72 L 495,230"
+          stroke="#8a7d6c" stroke-width="1.2" stroke-dasharray="5,3"
+          fill="none" marker-end="url(#arr-f)"/>
+
+    <!-- ── Active ↔ Recoverable ────────────────── -->
+
+    <!-- ACTIVE → SUSPENDED  (forward, upper diagonal) -->
+    <line x1="618" y1="258" x2="803" y2="143"
+          stroke="#1c1814" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- SUSPENDED → ACTIVE  (return, smooth curve — rust) -->
+    <path d="M 801,168 C 752,245 698,270 620,280"
+          stroke="#a8421f" stroke-width="1.25" fill="none" marker-end="url(#arr-a)"/>
+
+    <!-- ACTIVE → LAPSED  (forward, lower diagonal) -->
+    <line x1="618" y1="293" x2="801" y2="331"
+          stroke="#1c1814" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- LAPSED → ACTIVE  (return, smooth curve below — rust) -->
+    <path d="M 801,352 C 752,392 700,368 620,304"
+          stroke="#a8421f" stroke-width="1.25" fill="none" marker-end="url(#arr-a)"/>
+
+    <!-- ── Active → Terminal ───────────────────── -->
+
+    <!-- ACTIVE → REVOKED  (for cause, bottom-left) -->
+    <line x1="420" y1="324" x2="215" y2="479"
+          stroke="#1c1814" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- ACTIVE → SUPERSEDED  (orderly, bottom-right) -->
+    <line x1="572" y1="324" x2="800" y2="479"
+          stroke="#1c1814" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- ── Drain to Archived ───────────────────── -->
+
+    <!-- REVOKED → ARCHIVED -->
+    <path d="M 218,545 C 305,592 385,633 401,646"
+          stroke="#1c1814" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+    <!-- SUPERSEDED → ARCHIVED -->
+    <path d="M 798,545 C 712,592 630,633 611,646"
+          stroke="#1c1814" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  ARROW LABELS                               -->
+    <!-- ═══════════════════════════════════════════ -->
+
+    <!-- DRAFTED → PROVISIONAL -->
+    <text x="170" y="143"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#1c1814" letter-spacing="0.13em">ONBOARDING</text>
+
+    <!-- PROVISIONAL → ACTIVE -->
+    <text x="263" y="226"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#1c1814" letter-spacing="0.1em">go live</text>
+
+    <!-- Skip label — on horizontal segment -->
+    <text x="305" y="63"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#8a7d6c" letter-spacing="0.1em">skip · must justify</text>
+
+    <!-- ACTIVE → SUSPENDED -->
+    <text x="682" y="188"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#1c1814" letter-spacing="0.1em">pause</text>
+
+    <!-- SUSPENDED → ACTIVE (return) -->
+    <text x="682" y="248"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#a8421f" letter-spacing="0.1em">resume</text>
+
+    <!-- ACTIVE → LAPSED -->
+    <text x="655" y="320"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#1c1814" letter-spacing="0.08em">scope breach · auto</text>
+
+    <!-- LAPSED → ACTIVE (return) -->
+    <text x="695" y="370"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#a8421f" letter-spacing="0.1em">re-sign</text>
+
+    <!-- ACTIVE → REVOKED -->
+    <text x="290" y="420"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#1c1814" letter-spacing="0.1em">for cause</text>
+
+    <!-- ACTIVE → SUPERSEDED -->
+    <text x="612" y="420"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#1c1814" letter-spacing="0.1em">orderly update</text>
+
+    <!-- REVOKED → ARCHIVED -->
+    <text x="240" y="603"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#1c1814" letter-spacing="0.1em">after drain</text>
+
+    <!-- SUPERSEDED → ARCHIVED -->
+    <text x="684" y="603"
+          font-family="IBM Plex Mono, monospace" font-size="8"
+          fill="#1c1814" letter-spacing="0.1em">after drain</text>
+
+  </svg>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="ll ll-ink"></div>
+      Standard transition
+    </div>
+    <div class="legend-item">
+      <div class="ll ll-accent"></div>
+      Recovery / return to Active
+    </div>
+    <div class="legend-item">
+      <div class="ll ll-faint"></div>
+      Exceptional path · requires justification
+    </div>
+  </div>
+
+  <!-- Caption -->
+  <div class="caption">
+    <div>
+      <h3 class="h3-ink">Superseded ≠ Revoked</h3>
+      <p>Both exit Active and lead to Archived. The distinction is intent: <em>Superseded</em> is an orderly update — the successor was ready, no fallback was invoked. <em>Revoked</em> is withdrawal for cause — the fallback set engages immediately. Recording this in the state keeps orderly succession from being logged as an exceptional event.</p>
+    </div>
+    <div>
+      <h3 class="h3-accent">The standard path is Drafted → Provisional → Active</h3>
+      <p>Skipping Provisional is permitted but <em>must be explicitly justified</em> in the signature record. Provisional exists so the system can run in shadow mode — observable, logged, but taking no live action — before the signature goes fully active.</p>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>
