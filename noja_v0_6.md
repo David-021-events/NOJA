@@ -126,6 +126,8 @@ Superseded is distinguished from Revoked-with-cut-over by intent: Superseded mar
 
 Required transitions: Drafted → Provisional → Active is the standard onboarding path; skipping Provisional MUST be explicitly justified in the signature record. Active → any other state is permitted. Archived is reachable only after live execution governed by the signature has fully drained.
 
+→ [Diagram: Signature State Machine](https://David-021-events.github.io/NOJA/diagrams/signature_state_machine.html)
+
 ### **4.2 Fallback specification**
 
 Every signature in the Active state MUST name a set of acceptable **fallbacks** — pre-signed policies that govern execution in the interval between the active signature ceasing (through suspension, lapse, or revocation) and a successor being signed.
