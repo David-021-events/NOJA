@@ -35,7 +35,7 @@ NOJA's contribution is structural, not philosophical. It draws on Simon's decisi
 A **judgment node** is the unit of structure in NOJA. Every judgment node MUST contain four distinguishable functions, logically ordered for accountability though implementation MAY interleave them, and bounded by a single accountable role.
 
 ### **2.1 Prediction**
-→ [Diagram: The Judgment Node](https://David-021-events.github.io/YOUR-REPO/diagrams/judgment_node_diagram.html)
+→ [Diagram: The Judgment Node](https://David-021-events.github.io/NOJA/diagrams/judgment_node_diagram.html)
 
 The **prediction** function produces probabilities, classifications, forecasts, completions, or candidates describing what is or might be the case. Prediction MUST NOT prescribe action.
 
@@ -97,7 +97,7 @@ The network MAY recurse to arbitrary depth. A node's encoded judgments MAY thems
 
 *(Non-normative pattern.)* The most common composition pattern in high-stakes domains pairs a design-time signer who establishes encoded policy for routine cases with a named HITL role for cases that breach defined thresholds. NOJA names this the *escalation handoff*. Nuclear command, aviation autopilot, and credit underwriting implement variants. The escalation thresholds are themselves part of the design-time signed artifact and are an act of encoded judgment in their own right.
 
-→ [Diagram: The Escalation Handoff](https://David-021-events.github.io/YOUR-REPO/diagrams/escalation_handoff_diagram.html)
+→ [Diagram: The Escalation Handoff](https://David-021-events.github.io/NOJA/diagrams/escalation_handoff_diagram.html)
 
 ---
 
